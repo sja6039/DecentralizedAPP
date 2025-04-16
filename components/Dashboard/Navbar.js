@@ -7,18 +7,11 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import Link from 'next/link'
 import { useRouter } from 'next/router';
-import { logOut } from '@/backend/Auth';
-import { useStateContext } from '@/context/StateContext';
 
 const Navbar = () => {
-  const { user } = useStateContext();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const handleLogout = async () => {
-    await logOut();
-    router.push('/');
-  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -43,20 +36,6 @@ const Navbar = () => {
           <NavLink href="/explore" isActive={router.pathname === '/explore'} onClick={() => setIsMenuOpen(false)}>
             Explore Parks
           </NavLink>
-          {!user ? (
-            <>
-              <NavLink href="/auth/login" isActive={router.pathname === '/auth/login'} onClick={() => setIsMenuOpen(false)}>
-                Login
-              </NavLink>
-              <NavLink href="/auth/signup" isActive={router.pathname === '/auth/signup'} onClick={() => setIsMenuOpen(false)}>
-                Sign Up
-              </NavLink>
-            </>
-          ) : (
-            <NavLink href="/" onClick={handleLogout}>
-              Log out
-            </NavLink>
-          )}
         </NavLinks>
       </NavContainer>
     </Nav>

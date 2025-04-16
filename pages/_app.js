@@ -1,5 +1,4 @@
 import Head from 'next/head' //use instead of head
-import { StateContext } from "@/context/StateContext"
 import { createGlobalStyle } from 'styled-components'
 
 export const GlobalStyle = createGlobalStyle`
@@ -28,9 +27,9 @@ export default function App({ Component, pageProps }) {
 
         <GlobalStyle />
 
-      <StateContext>
+
         <Component {...pageProps} />
-      </StateContext>
+
     </>
   )
 }

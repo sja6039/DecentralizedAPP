@@ -6,11 +6,8 @@ You can only upload your own images when you are logged in as a user.
 */
 import { useState, useEffect } from 'react';
 import { styled } from 'styled-components';
-import { storage, db } from '@/backend/Firebase';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { collection, addDoc, getDocs } from 'firebase/firestore';
 import Navbar from '@/components/Dashboard/Navbar';
-import { getAuth } from 'firebase/auth';
+
 
 const parks = [
   "Acadia",
@@ -91,15 +88,7 @@ export default function GalleryPage() {
   /*
   determines whether the user is logged in or not
   */
-  useEffect(() => {
-    const auth = getAuth();
-    setUser(auth.currentUser);
-    const unsubscribe = auth.onAuthStateChanged(user => {
-      setUser(user);
-    });
-    fetchImages();
-    return () => unsubscribe();
-  }, [selectedPark]);
+
   /*
   fetches all images from firebase storage and captions from firestore.
   filters them so the newest images are displayed first.

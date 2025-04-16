@@ -7,12 +7,6 @@ Dynamic map that will show the markers turned green once visited
 import { styled } from 'styled-components'
 import Navbar from "@/components/Dashboard/Navbar"
 import React, { useState, useEffect } from 'react';
-import { GoogleMap, Marker, LoadScript, InfoWindow } from '@react-google-maps/api';
-import { googleMapsApiKey } from './api/apiref'; 
-import { NPSApiKey } from './api/apiref';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
-import { db } from '@/backend/Firebase';
 
 export default function Explore() {
     const [parks, setParks] = useState({});
@@ -27,18 +21,7 @@ export default function Explore() {
     UI has a few changes when user is logged in
     need to load visited parks once a user is active
     */
-    useEffect(() => {
-      const auth = getAuth();
-      const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        setUser(user);
-        if (user) {
-          await loadVisitedParks(user.uid);
-        } else {
-          setVisitedParks([]);
-        }
-      });
-      return () => unsubscribe();
-    }, []);
+
     /*
     loading the parks that the user has marked as visited
     grabs their array from the db or creates an empty one if there is none
@@ -302,69 +285,6 @@ export default function Explore() {
 
           </Sidebar>
 
-          <MapContainer>
-            <LoadScript googleMapsApiKey={googleMapsApiKey}> 
-              <GoogleMap
-                mapContainerStyle={{ width: '100%', height: '100%' }}
-                center={mapCenter}
-                zoom={zoom}
-                options={{
-                  mapTypeControl: true,
-                  streetViewControl: true,
-                  fullscreenControl: true
-                }}
-              >
-                {Object.keys(parks).length > 0 && Object.values(parks).flat().map((park, idx) => (
-                    <Marker 
-                      key={idx} 
-                      position={park.location}
-                      title={park.name}
-                      animation={selectedPark && selectedPark.name === park.name ? 2 : 0}
-                      onClick={() => clickPark(park)}
-                      icon={visitedParks.includes(park.parkCode) ? {
-                        url: "https://maps.google.com/mapfiles/ms/icons/green-dot.png"
-                      } : undefined}
-                    />
-                  ))
-                }
-                
-                {selectedPark && (
-                  <InfoWindow
-                    position={selectedPark.location}
-                    onCloseClick={() => setSelectedPark(null)}
-                    options={{
-                      pixelOffset: new window.google.maps.Size(0, -20),
-                      maxWidth: 400,
-                    }}
-                  >
-                    <EnhancedInfoContent>
-                      <ParkTitle>{selectedPark.name}</ParkTitle>
-                      <ButtonContainer>
-                        {user && (
-                          <VisitButton 
-                            onClick={() => toggleVisitedPark(selectedPark.parkCode)}
-                            isVisited={visitedParks.includes(selectedPark.parkCode)}
-                          >
-                            {visitedParks.includes(selectedPark.parkCode) ? "Mark as Not Visited" : "Mark as Visited"}
-                          </VisitButton>
-                        )}
-                        <NPSButton 
-                          href={`https://www.nps.gov/${selectedPark.parkCode}`} 
-                        >
-                          Visit Official Park Website
-                        </NPSButton>
-                        <DirectionsButton
-                          href={`https://www.google.com/maps/dir/?api=1&destination=${selectedPark.location.lat},${selectedPark.location.lng}`}
-                        >
-                          Get Directions
-                        </DirectionsButton>
-                      </ButtonContainer>
-                    </EnhancedInfoContent>
-                  </InfoWindow>
-                )}
-              </GoogleMap>
-            </LoadScript>
-          </MapContainer>
 
           {selectedPark && (
             <ActivitiesPanel>
