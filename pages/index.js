@@ -1,136 +1,227 @@
 /*
- * Homepage/Landing page for KeyForge, a decentralized password management system
- * This is where users will first be introduced to the application and its features.
- * This page displays the title, slogan, and key features of the application.
+ * Updated Homepage for KeyForge, a decentralized password management system
+ * Featuring a more modern, visually appealing layout with enhanced user engagement
  */
-import { styled } from 'styled-components'
-import Navbar from "@/components/Dashboard/Navbar"
 import React from 'react';
-import { Lock, Shield, Key } from 'lucide-react'; // Using lucide-react icons
+import styled from 'styled-components';
+import Navbar from "@/components/Dashboard/Navbar";
+import { Lock, Shield, Key, ExternalLink, ArrowRight } from 'lucide-react';
 
 export default function Home() {
   return (
     <Container>
       <Navbar />
-      <MainContent>
-        <ContentWrapper>
-          <WelcomeInfo>
-            <h1>KeyForge</h1>
-            <p>Decentralized password management with blockchain security</p>
-            <ConnectButton>Connect Wallet</ConnectButton>
-          </WelcomeInfo>
-          <FeatureSection>
-            <Feature>
-              <IconWrapper>
-                <Lock />
-              </IconWrapper>
-              <h2>Secure Encryption</h2>
-              <p>Your passwords are encrypted and only accessible by you</p>
-            </Feature>
-            <Feature>
-              <IconWrapper>
-                <Shield />
-              </IconWrapper>
-              <h2>Decentralized Storage</h2>
-              <p>No central database means no single point of failure</p>
-            </Feature>
-            <Feature>
-              <IconWrapper>
-                <Key />
-              </IconWrapper>
-              <h2>Full Ownership</h2>
-              <p>You own your data with transparent blockchain technology</p>
-            </Feature>
-          </FeatureSection>
-        </ContentWrapper>
-      </MainContent>
+      <HeroSection>
+        <HeroContent>
+          <HeroTitle>KeyForge</HeroTitle>
+          <HeroSubtitle>Secure Your Digital Life with Blockchain Technology</HeroSubtitle>
+          <HeroDescription>
+            A decentralized password manager that gives you complete control over your credentials.
+          </HeroDescription>
+          <ButtonGroup>
+            <PrimaryButton>
+              Connect Wallet <ArrowRight size={16} />
+            </PrimaryButton>
+          </ButtonGroup>
+        </HeroContent>
+        <HeroImageContainer>
+          <GlowEffect />
+          <SecurityAnimation>
+            <LockAnimationOuter>
+              <LockAnimationInner>
+                <Lock size={80} color="#fff" />
+              </LockAnimationInner>
+            </LockAnimationOuter>
+          </SecurityAnimation>
+        </HeroImageContainer>
+      </HeroSection>
+
+      <FeaturesSection>
+        <SectionTitle>Why Choose KeyForge?</SectionTitle>
+        <FeaturesGrid>
+          <FeatureCard>
+            <FeatureIconWrapper>
+              <Lock />
+            </FeatureIconWrapper>
+            <FeatureContent>
+              <FeatureTitle>End-to-End Encryption</FeatureTitle>
+              <FeatureDescription>
+                Your passwords are encrypted on your device before being stored. Only you have the keys to decrypt them.
+              </FeatureDescription>
+            </FeatureContent>
+          </FeatureCard>
+          
+          <FeatureCard>
+            <FeatureIconWrapper>
+              <Shield />
+            </FeatureIconWrapper>
+            <FeatureContent>
+              <FeatureTitle>Decentralized Architecture</FeatureTitle>
+              <FeatureDescription>
+                No central database means no single point of failure and no company controlling your data.
+              </FeatureDescription>
+            </FeatureContent>
+          </FeatureCard>
+          
+          <FeatureCard>
+            <FeatureIconWrapper>
+              <Key />
+            </FeatureIconWrapper>
+            <FeatureContent>
+              <FeatureTitle>Full User Ownership</FeatureTitle>
+              <FeatureDescription>
+                Your wallet is your identity. You own your data with transparent blockchain technology.
+              </FeatureDescription>
+            </FeatureContent>
+          </FeatureCard>
+        </FeaturesGrid>
+      </FeaturesSection>
+
+      <HowItWorksSection>
+        <SectionTitle>How It Works</SectionTitle>
+        <StepContainer>
+          <Step>
+            <StepNumber>1</StepNumber>
+            <StepContent>
+              <StepTitle>Connect Your Wallet</StepTitle>
+              <StepDescription>
+                Use MetaMask to authenticate securely with blockchain technology.
+              </StepDescription>
+            </StepContent>
+          </Step>
+          
+          <Step>
+            <StepNumber>2</StepNumber>
+            <StepContent>
+              <StepTitle>Store Your Passwords</StepTitle>
+              <StepDescription>
+                Create and store encrypted passwords that only you can access with your private keys.
+              </StepDescription>
+            </StepContent>
+          </Step>
+          
+          <Step>
+            <StepNumber>3</StepNumber>
+            <StepContent>
+              <StepTitle>Access Anywhere</StepTitle>
+              <StepDescription>
+                Securely access your passwords from any device by connecting your wallet.
+              </StepDescription>
+            </StepContent>
+          </Step>
+        </StepContainer>
+      </HowItWorksSection>
+
     </Container>
   );
 }
 
+// Container and main layout
 const Container = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background: linear-gradient(135deg, #0f0f1e 0%, #16213e 100%);
   overflow-x: hidden;
-  overflow-y: auto;
 `;
 
-const MainContent = styled.main`
+// Hero section styles
+const HeroSection = styled.section`
   display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-grow: 1;
+  min-height: 80vh;
   padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  align-items: center;
+  
+  @media (max-width: 992px) {
+    flex-direction: column;
+    gap: 3rem;
+    text-align: center;
+    padding-top: 4rem;
+  }
 `;
 
-const ContentWrapper = styled.div`
+const HeroContent = styled.div`
+  flex: 1;
+  padding: 2rem;
+  
+  @media (max-width: 992px) {
+    padding: 1rem;
+    order: 2;
+  }
+`;
+
+const HeroTitle = styled.h1`
+  font-size: 4.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  background: linear-gradient(to right, #9d4edd, #5a189a, #3c096c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  
+  @media (max-width: 768px) {
+    font-size: 3rem;
+  }
+`;
+
+const HeroSubtitle = styled.h2`
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #c8c8ff;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+`;
+
+const HeroDescription = styled.p`
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #b0b0cc;
+  margin-bottom: 2rem;
+  max-width: 600px;
+  
+  @media (max-width: 992px) {
+    margin: 0 auto 2rem auto;
+  }
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 1rem;
+  
+  @media (max-width: 992px) {
+    justify-content: center;
+  }
+  
+  @media (max-width: 576px) {
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+`;
+
+const PrimaryButton = styled.button`
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 1200px;
-  gap: 3rem;
-  
-  @media (max-width: 768px) {
-    flex-direction: column;
-    text-align: center;
-  }
-`;
-
-const WelcomeInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  color: #f8f8ff;
-  max-width: 50%;
-  
-  @media (max-width: 768px) {
-    max-width: 100%;
-    align-items: center;
-  }
-  
-  h1 {
-    font-family: 'Roboto', sans-serif;
-    font-size: 3.5rem;
-    margin-bottom: 0.5rem;
-    background: linear-gradient(to right, #9d4edd, #5a189a);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    
-    @media (max-width: 768px) {
-      font-size: 2.5rem;
-    }
-  }
-  
-  p {
-    font-family: 'Roboto', sans-serif;
-    font-size: 1.2rem;
-    line-height: 1.6;
-    color: #c8c8ff;
-    
-    @media (max-width: 768px) {
-      font-size: 1rem;
-    }
-  }
-`;
-
-const ConnectButton = styled.button`
+  justify-content: center;
+  gap: 0.5rem;
   padding: 1rem 2rem;
   font-size: 1rem;
   font-weight: 600;
   background: linear-gradient(to right, #7b2cbf, #5a189a);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
-  width: fit-content;
   
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(90, 24, 154, 0.4);
+    box-shadow: 0 8px 20px rgba(90, 24, 154, 0.4);
   }
   
   &:active {
@@ -138,15 +229,141 @@ const ConnectButton = styled.button`
   }
 `;
 
-const IconWrapper = styled.div`
+const HeroImageContainer = styled.div`
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  min-height: 400px;
+  
+  @media (max-width: 992px) {
+    order: 1;
+    min-height: 300px;
+  }
+`;
+
+const GlowEffect = styled.div`
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(123, 44, 191, 0.3) 0%, rgba(90, 24, 154, 0.1) 50%, transparent 70%);
+  border-radius: 50%;
+  z-index: 1;
+  
+  @media (max-width: 768px) {
+    width: 250px;
+    height: 250px;
+  }
+`;
+
+const SecurityAnimation = styled.div`
+  position: relative;
+  z-index: 2;
+`;
+
+const LockAnimationOuter = styled.div`
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(123, 44, 191, 0.4) 0%, rgba(90, 24, 154, 0.2) 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: pulse 3s infinite alternate;
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 0 30px rgba(123, 44, 191, 0.3);
+    }
+    100% {
+      transform: scale(1.05);
+      box-shadow: 0 0 50px rgba(123, 44, 191, 0.5);
+    }
+  }
+`;
+
+const LockAnimationInner = styled.div`
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7b2cbf 0%, #5a189a 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 10px 30px rgba(90, 24, 154, 0.5);
+`;
+
+// Features section styles
+const FeaturesSection = styled.section`
+  padding: 6rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    padding: 4rem 1rem;
+  }
+`;
+
+const SectionTitle = styled.h2`
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 3rem;
+  text-align: center;
+  color: #f0f0ff;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+`;
+
+const FeaturesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  
+  @media (max-width: 992px) {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+`;
+
+const FeatureCard = styled.div`
+  display: flex;
+  background: rgba(30, 30, 60, 0.3);
+  border-radius: 16px;
+  padding: 2rem;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(123, 44, 191, 0.1);
+  gap: 1.5rem;
+  
+  &:hover {
+    transform: translateY(-5px);
+    background: rgba(30, 30, 60, 0.5);
+    border-color: rgba(123, 44, 191, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  }
+  
+  @media (max-width: 576px) {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+`;
+
+const FeatureIconWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   width: 60px;
   height: 60px;
+  min-width: 60px;
   background: linear-gradient(135deg, #7b2cbf 0%, #5a189a 100%);
-  border-radius: 50%;
-  margin-bottom: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(90, 24, 154, 0.3);
   
   svg {
     width: 30px;
@@ -155,59 +372,85 @@ const IconWrapper = styled.div`
   }
 `;
 
-const FeatureSection = styled.section`
+const FeatureContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  max-width: 50%;
+  gap: 0.5rem;
+`;
+
+const FeatureTitle = styled.h3`
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #d8bfff;
+`;
+
+const FeatureDescription = styled.p`
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #b0b0cc;
+`;
+
+// How it works section styles
+const HowItWorksSection = styled.section`
+  padding: 6rem 2rem;
+  background: linear-gradient(to bottom, rgba(30, 30, 60, 0.3), transparent);
+  max-width: 1400px;
+  margin: 0 auto;
   
   @media (max-width: 768px) {
-    max-width: 100%;
-    align-items: center;
+    padding: 4rem 1rem;
   }
 `;
 
-const Feature = styled.div`
+const StepContainer = styled.div`
   display: flex;
   flex-direction: column;
+  gap: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+`;
+
+const Step = styled.div`
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  
+  @media (max-width: 576px) {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+`;
+
+const StepNumber = styled.div`
+  display: flex;
+  justify-content: center;
   align-items: center;
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+  background: linear-gradient(135deg, #7b2cbf 0%, #5a189a 100%);
+  border-radius: 50%;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  box-shadow: 0 5px 15px rgba(90, 24, 154, 0.3);
+`;
+
+const StepContent = styled.div`
+  display: flex;
+  flex-direction: column;
   gap: 0.5rem;
-  color: #f8f8ff;
-  font-family: 'Roboto', sans-serif;
-  padding: 1.8rem;
-  border-radius: 12px;
-  background-color: rgba(30, 30, 60, 0.5);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-  text-align: center;
-  width: 100%;
-  max-width: 350px;
-  border: 1px solid rgba(123, 44, 191, 0.2);
-  
-  h2 {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-    color: #d8bfff;
-    
-    @media (max-width: 768px) {
-      font-size: 1.2rem;
-    }
-  }
-  
-  p {
-    font-size: 1rem;
-    line-height: 1.5;
-    color: #bfbfff;
-    
-    @media (max-width: 768px) {
-      font-size: 0.9rem;
-    }
-  }
-  
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    background-color: rgba(30, 30, 60, 0.7);
-    border: 1px solid rgba(123, 44, 191, 0.5);
-  }
+`;
+
+const StepTitle = styled.h3`
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #d8bfff;
+`;
+
+const StepDescription = styled.p`
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #b0b0cc;
 `;
