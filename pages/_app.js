@@ -14,7 +14,7 @@ export default function App({ Component, pageProps }) {
   return (
     <>
         <Head>
-          <title>NomadTrek</title>
+          <title>KeyForge</title>
           <meta name='description' content='Put a description here about your app'/>
           <meta name='robots' content='index, follow'/>
           <link rel="apple-touch-icon" sizes="180x180" href="/favicon_package/apple-touch-icon.png"/>
