@@ -19,7 +19,6 @@ const Navbar = () => {
   };
   
   const handleConnectWallet = () => {
-    // This would integrate with MetaMask or other wallet providers
     setIsWalletConnected(!isWalletConnected);
   };
 
