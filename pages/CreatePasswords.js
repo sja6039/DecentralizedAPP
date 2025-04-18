@@ -39,9 +39,7 @@ export default function CreatePassword() {
   const [isSaving, setIsSaving] = useState(false);
   const [strength, setStrength] = useState(0);
 
-  // This would be replaced with actual password generation logic
   const generatePassword = () => {
-    // Simple placeholder for password generation
     const chars = [
       includeLowercase ? 'abcdefghijklmnopqrstuvwxyz' : '',
       includeUppercase ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' : '',
@@ -314,7 +312,6 @@ export default function CreatePassword() {
   );
 }
 
-// Styled Components
 const Container = styled.div`
   display: flex;
   flex-direction: column;

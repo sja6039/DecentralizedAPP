@@ -1,11 +1,10 @@
 /*
- * Updated Homepage for KeyForge, a decentralized password management system
- * Featuring a more modern, visually appealing layout with enhanced user engagement
+ * Homepage for KeyForge, a decentralized password management system
  */
 import React from 'react';
 import styled from 'styled-components';
 import Navbar from "@/components/Dashboard/Navbar";
-import { Lock, Shield, Key, ExternalLink, ArrowRight } from 'lucide-react';
+import { Lock, Shield, Key, ArrowRight } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -116,7 +115,6 @@ export default function Home() {
   );
 }
 
-// Container and main layout
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -125,7 +123,6 @@ const Container = styled.div`
   overflow-x: hidden;
 `;
 
-// Hero section styles
 const HeroSection = styled.section`
   display: flex;
   min-height: 80vh;
@@ -270,7 +267,7 @@ const LockAnimationOuter = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  animation: pulse 3s infinite alternate;
+  animation: pulse 2s infinite alternate;
   
   @keyframes pulse {
     0% {
@@ -295,7 +292,6 @@ const LockAnimationInner = styled.div`
   box-shadow: 0 10px 30px rgba(90, 24, 154, 0.5);
 `;
 
-// Features section styles
 const FeaturesSection = styled.section`
   padding: 6rem 2rem;
   max-width: 1400px;
@@ -390,7 +386,6 @@ const FeatureDescription = styled.p`
   color: #b0b0cc;
 `;
 
-// How it works section styles
 const HowItWorksSection = styled.section`
   padding: 6rem 2rem;
   background: linear-gradient(to bottom, rgba(30, 30, 60, 0.3), transparent);
