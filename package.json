@@ -13,6 +13,7 @@
     "axios": "^1.6.7",
     "babel-plugin-styled-components": "^2.1.4",
     "crypto": "^1.0.1",
+    "ethers": "^6.13.5",
     "firebase": "^10.8.1",
     "lucide-react": "^0.488.0",
     "mvp-starter": "file:",
