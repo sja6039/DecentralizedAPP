@@ -3,9 +3,11 @@
  * This page allows users to create and securely store new passwords
  * Users can generate strong passwords, categorize them, and add details
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { useRouter } from 'next/router';
 import Navbar from '@/components/Dashboard/Navbar';
+import { useWallet } from '@/contexts/WalletContext';
 import { Lock, Shield, RefreshCw, Copy, Eye, EyeOff, CheckCircle } from 'lucide-react';
 
 const passwordCategories = [
@@ -23,6 +25,9 @@ const passwordCategories = [
 ];
 
 export default function CreatePassword() {
+  const { walletAddress, connectWallet, isConnecting, connectionError } = useWallet();
+  const router = useRouter();
+  
   const [passwordLength, setPasswordLength] = useState(16);
   const [includeUppercase, setIncludeUppercase] = useState(true);
   const [includeLowercase, setIncludeLowercase] = useState(true);
@@ -38,6 +43,26 @@ export default function CreatePassword() {
   const [isCopied, setIsCopied] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [strength, setStrength] = useState(0);
+  
+  // Redirect to homepage if wallet is not connected
+  useEffect(() => {
+    const checkWalletConnection = () => {
+      if (!walletAddress && !isConnecting) {
+        // Show a message or confirm dialog before redirecting
+        const shouldRedirect = window.confirm(
+          "You need to connect your wallet to create passwords. Redirect to homepage?"
+        );
+        
+        if (shouldRedirect) {
+          router.push('/');
+        }
+      }
+    };
+    
+    // Small delay to prevent immediate check on initial load
+    const timer = setTimeout(checkWalletConnection, 1000);
+    return () => clearTimeout(timer);
+  }, [walletAddress, isConnecting, router]);
 
   const generatePassword = () => {
     const chars = [
@@ -104,12 +129,41 @@ export default function CreatePassword() {
       setGeneratedPassword('');
       setIsPasswordVisible(false);
       // Show success message or redirect
+      alert('Password saved successfully!');
+      router.push('/ViewPasswords');
     }, 2000);
   };
 
   const togglePasswordVisibility = () => {
     setIsPasswordVisible(!isPasswordVisible);
   };
+
+  // If wallet is not connected, show connection prompt
+  if (!walletAddress) {
+    return (
+      <Container>
+        <Navbar />
+        <WalletConnectionSection>
+          <LockIcon>
+            <Lock size={60} />
+          </LockIcon>
+          <ConnectionTitle>Connect Your Wallet to Create Passwords</ConnectionTitle>
+          <ConnectionDescription>
+            KeyForge uses blockchain technology to securely store your passwords.
+            Connect your MetaMask wallet to create and encrypt new passwords.
+          </ConnectionDescription>
+          <ConnectButton
+            onClick={connectWallet}
+            disabled={isConnecting}
+          >
+            {isConnecting ? 'Connecting...' : 'Connect MetaMask Wallet'}
+            <WalletIcon />
+          </ConnectButton>
+          {connectionError && <ErrorMessage>{connectionError}</ErrorMessage>}
+        </WalletConnectionSection>
+      </Container>
+    );
+  }
 
   return (
     <Container>
@@ -312,6 +366,14 @@ export default function CreatePassword() {
   );
 }
 
+// Icon Component for Wallet
+const WalletIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M19 7V5C19 3.89543 18.1046 3 17 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H17C18.1046 21 19 20.1046 19 19V17M21 12H13C12.4477 12 12 12.4477 12 13V16C12 16.5523 12.4477 17 13 17H21C21.5523 17 22 16.5523 22 16V13C22 12.4477 21.5523 12 21 12ZM16 14.5C16 15.0523 15.5523 15.5 15 15.5C14.4477 15.5 14 15.0523 14 14.5C14 13.9477 14.4477 13.5 15 13.5C15.5523 13.5 16 13.9477 16 14.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+// Styled Components
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -319,6 +381,96 @@ const Container = styled.div`
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   color: #f0f0ff;
   font-family: 'Roboto', sans-serif;
+`;
+
+const WalletConnectionSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 2rem;
+  background: rgba(30, 30, 70, 0.3);
+  border-radius: 16px;
+  border: 1px solid rgba(123, 44, 191, 0.2);
+  max-width: 480px;
+  margin: 4rem auto;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+
+  @media (max-width: 768px) {
+    padding: 2rem 1.5rem;
+    margin: 2rem 1rem;
+  }
+`;
+
+const LockIcon = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, #7b2cbf 0%, #5a189a 100%);
+  border-radius: 50%;
+  margin-bottom: 2rem;
+  color: white;
+  box-shadow: 0 8px 20px rgba(90, 24, 154, 0.3);
+`;
+
+const ConnectionTitle = styled.h2`
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  background: linear-gradient(to right, #9d4edd, #5a189a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+`;
+
+const ConnectionDescription = styled.p`
+  font-size: 1rem;
+  color: #b0b0cc;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+`;
+
+const ConnectButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background: linear-gradient(to right, #7b2cbf, #5a189a);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(90, 24, 154, 0.3);
+  }
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+`;
+
+const ErrorMessage = styled.div`
+  color: #ff4757;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  padding: 0.8rem;
+  background: rgba(255, 71, 87, 0.1);
+  border-radius: 8px;
+  border-left: 3px solid #ff4757;
+  max-width: 100%;
+  text-align: left;
 `;
 
 const PageContent = styled.main`

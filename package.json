@@ -21,7 +21,8 @@
     "react": "^18",
     "react-dom": "^18",
     "react-icons": "^5.0.1",
-    "styled-components": "^6.1.15"
+    "styled-components": "^6.1.15",
+    "thirdweb-react-monorepo": "github:thirdweb-dev/react"
   },
   "description": "`npm run dev` for running dev server `npm run build` for creating a production build `npm run start` for testing production build",
   "main": "next.config.js",

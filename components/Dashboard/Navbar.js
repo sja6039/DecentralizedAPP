@@ -1,25 +1,23 @@
-/*
- * Navbar to be imported to each page of the KeyForge application
- * Will have links to all tabs highlighting what path you're currently on
- * Will have connect wallet button for blockchain authentication
- */
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Lock, Menu, X } from 'lucide-react';
+import { useWallet } from '@/contexts/WalletContext';
 
 const Navbar = () => {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const { 
+    walletAddress, 
+    isConnecting, 
+    connectWallet, 
+    disconnectWallet,
+    formatWalletAddress
+  } = useWallet();
   
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-  };
-  
-  const handleConnectWallet = () => {
-    setIsWalletConnected(!isWalletConnected);
   };
 
   return (
@@ -38,15 +36,29 @@ const Navbar = () => {
           <NavLink href="/" isActive={router.pathname === '/'} onClick={() => setIsMenuOpen(false)}>
             Dashboard
           </NavLink>
-          <NavLink href="/CreatePasswords" isActive={router.pathname === '/CreatePassword'} onClick={() => setIsMenuOpen(false)}>
+          <NavLink 
+            href="/CreatePasswords" 
+            isActive={router.pathname === '/CreatePasswords'} 
+            onClick={() => setIsMenuOpen(false)}
+          >
             Create
           </NavLink>
-          <NavLink href="/ViewPasswords" isActive={router.pathname === '/ViewPassword'} onClick={() => setIsMenuOpen(false)}>
+          <NavLink 
+            href="/ViewPasswords" 
+            isActive={router.pathname === '/ViewPasswords'} 
+            onClick={() => setIsMenuOpen(false)}
+          >
             View
           </NavLink>
-          <WalletButton onClick={handleConnectWallet}>
-            {isWalletConnected ? 'Wallet Connected' : 'Connect Wallet'}
-          </WalletButton>
+          {walletAddress ? (
+            <WalletConnectedButton onClick={disconnectWallet}>
+              {formatWalletAddress(walletAddress)}
+            </WalletConnectedButton>
+          ) : (
+            <WalletButton onClick={connectWallet} disabled={isConnecting}>
+              {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+            </WalletButton>
+          )}
         </NavLinks>
       </NavContainer>
     </Nav>
@@ -190,9 +202,26 @@ const WalletButton = styled.button`
     transform: translateY(0);
   }
   
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
   @media (max-width: 768px) {
     margin-top: 1rem;
     width: 100%;
+  }
+`;
+
+const WalletConnectedButton = styled(WalletButton)`
+  background: rgba(123, 44, 191, 0.2);
+  border: 1px solid rgba(123, 44, 191, 0.4);
+  color: #d8bfff;
+  
+  &:hover {
+    background: rgba(123, 44, 191, 0.3);
   }
 `;
 

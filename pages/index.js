@@ -3,10 +3,25 @@
  */
 import React from 'react';
 import styled from 'styled-components';
+import { useRouter } from 'next/router';
 import Navbar from "@/components/Dashboard/Navbar";
 import { Lock, Shield, Key, ArrowRight } from 'lucide-react';
+import { useWallet } from '@/contexts/WalletContext';
 
 export default function Home() {
+  const { walletAddress, connectWallet, isConnecting } = useWallet();
+  const router = useRouter();
+
+  const handleGetStarted = () => {
+    if (walletAddress) {
+      // If wallet is connected, redirect to create password page
+      router.push('/CreatePassword');
+    } else {
+      // If wallet isn't connected, attempt to connect
+      connectWallet();
+    }
+  };
+
   return (
     <Container>
       <Navbar />
@@ -18,8 +33,14 @@ export default function Home() {
             A decentralized password manager that gives you complete control over your credentials.
           </HeroDescription>
           <ButtonGroup>
-            <PrimaryButton>
-              Connect Wallet <ArrowRight size={16} />
+            <PrimaryButton onClick={handleGetStarted} disabled={isConnecting}>
+              {walletAddress 
+                ? 'Get Started' 
+                : isConnecting 
+                  ? 'Connecting...' 
+                  : 'Connect Wallet'
+              }
+              <ArrowRight size={16} />
             </PrimaryButton>
           </ButtonGroup>
         </HeroContent>
@@ -110,7 +131,6 @@ export default function Home() {
           </Step>
         </StepContainer>
       </HowItWorksSection>
-
     </Container>
   );
 }
@@ -223,6 +243,13 @@ const PrimaryButton = styled.button`
   
   &:active {
     transform: translateY(-1px);
+  }
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
   }
 `;
 

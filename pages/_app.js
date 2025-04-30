@@ -1,5 +1,6 @@
 import Head from 'next/head' //use instead of head
 import { createGlobalStyle } from 'styled-components'
+import { WalletProvider } from '@/contexts/WalletContext'
 
 export const GlobalStyle = createGlobalStyle`
   * 
@@ -12,6 +13,7 @@ export const GlobalStyle = createGlobalStyle`
 
 export default function App({ Component, pageProps }) {
   return (
+    <WalletProvider>
     <>
         <Head>
           <title>KeyForge</title>
@@ -31,6 +33,7 @@ export default function App({ Component, pageProps }) {
         <Component {...pageProps} />
 
     </>
+    </WalletProvider>
   )
 }
 
