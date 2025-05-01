@@ -1,9 +1,6 @@
 // contractService.js
 // Service to interact with the SimplePasswordManager smart contract
-
 import { ethers } from "ethers";
-
-// Your contract ABI (Replace with your actual contract ABI from Remix)
 const contractABI = [
 	{
 		"inputs": [
@@ -99,10 +96,8 @@ const contractABI = [
 	}
 ];
 
-// Replace with your deployed contract address
 const contractAddress = "0x10e1e109889ef1dd77133522c7216f3b3a4a3c6e"
 
-// Get web3 provider
 const getProvider = () => {
   if (window.ethereum) {
     return new ethers.providers.Web3Provider(window.ethereum);
@@ -110,7 +105,6 @@ const getProvider = () => {
   throw new Error("No Ethereum browser extension detected");
 };
 
-// Get contract instance
 export const getContract = async () => {
   const provider = getProvider();
   await provider.send("eth_requestAccounts", []);
@@ -119,17 +113,12 @@ export const getContract = async () => {
 };
 
 // Encrypt password data using a simple method
-// In a production app, use a more robust encryption library
 export const encryptData = (data) => {
-  // This is a simple encryption for demonstration
-  // In a real app, use a library like eth-crypto or a similar encryption solution
-  const jsonStr = JSON.stringify(data);
   return btoa(jsonStr);
 };
 
 // Decrypt password data
 export const decryptData = (encryptedData) => {
-  // This is a simple decryption for demonstration
   try {
     const jsonStr = atob(encryptedData);
     return JSON.parse(jsonStr);
@@ -144,13 +133,9 @@ export const addPassword = async (passwordName, category, passwordData) => {
   try {
     const contract = await getContract();
     const passwordId = generatePasswordId(passwordName);
-    
-    // Encrypt the password data
     const encryptedData = encryptData(passwordData);
-    
-    // Call the smart contract
     const tx = await contract.addPassword(passwordId, encryptedData, category);
-    await tx.wait(); // Wait for transaction to be mined
+    await tx.wait(); 
     
     return { success: true, passwordId };
   } catch (error) {
@@ -164,7 +149,7 @@ export const deletePassword = async (passwordId) => {
   try {
     const contract = await getContract();
     const tx = await contract.deletePassword(passwordId);
-    await tx.wait(); // Wait for transaction to be mined
+    await tx.wait(); 
     
     return { success: true };
   } catch (error) {
@@ -178,8 +163,6 @@ export const getPassword = async (passwordId) => {
   try {
     const contract = await getContract();
     const [encryptedData, category] = await contract.getPassword(passwordId);
-    
-    // Decrypt the data
     const decryptedData = decryptData(encryptedData);
     
     return { 

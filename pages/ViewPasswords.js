@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import { Eye, EyeOff, Copy, Search, Lock, Trash2, ChevronLeft } from 'lucide-react';
 import Navbar from "@/components/Dashboard/Navbar";
 import { useWallet } from '@/contexts/WalletContext';
-// Import contract service functions
 import { getAllPasswords, deletePassword } from '../services/contractService';
 
 export default function ViewPasswords() {
@@ -30,15 +29,12 @@ export default function ViewPasswords() {
   const [passwords, setPasswords] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Check for mobile viewport
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
     handleResize();
     window.addEventListener('resize', handleResize);
-    
     return () => {
       window.removeEventListener('resize', handleResize);
     };
@@ -48,12 +44,9 @@ export default function ViewPasswords() {
   useEffect(() => {
     const fetchPasswords = async () => {
       if (!walletAddress) return;
-      
       setIsLoading(true);
-      
       try {
         const result = await getAllPasswords();
-        
         if (result.success) {
           setPasswords(result.passwords);
         } else {
@@ -103,10 +96,6 @@ export default function ViewPasswords() {
     setShowMobileDetail(false);
   };
   
-  const handleAddPassword = () => {
-    router.push('/CreatePassword');
-  };
-
   const handleDeletePassword = async (passwordId) => {
     if (!confirm('Are you sure you want to delete this password? This action cannot be undone.')) {
       return;
@@ -114,20 +103,15 @@ export default function ViewPasswords() {
     
     try {
       const result = await deletePassword(passwordId);
-      
       if (result.success) {
-        // Remove the password from state
         setPasswords(prev => prev.filter(pass => pass.id !== passwordId));
         setSelectedPassword(null);
       } else {
       }
     } catch (error) {
-
     }
   };
 
-
-  // If wallet is not connected, show connection prompt
   if (!walletAddress) {
     return (
       <Container>
@@ -322,7 +306,6 @@ export default function ViewPasswords() {
   );
 }
 
-// Icon Components
 const WalletIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M19 7V5C19 3.89543 18.1046 3 17 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H17C18.1046 21 19 20.1046 19 19V17M21 12H13C12.4477 12 12 12.4477 12 13V16C12 16.5523 12.4477 17 13 17H21C21.5523 17 22 16.5523 22 16V13C22 12.4477 21.5523 12 21 12ZM16 14.5C16 15.0523 15.5523 15.5 15 15.5C14.4477 15.5 14 15.0523 14 14.5C14 13.9477 14.4477 13.5 15 13.5C15.5523 13.5 16 13.9477 16 14.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -345,7 +328,6 @@ const EmptyStateIcon = () => (
   </svg>
 );
 
-// Styled Components
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -366,7 +348,6 @@ const MainContent = styled.main`
   }
 `;
 
-// Wallet connection styled components - Matches CreatePassword component
 const WalletConnectionSection = styled.div`
   display: flex;
   flex-direction: column;
@@ -406,7 +387,6 @@ const LoadingText = styled.div`
   font-size: 1.1rem;
 `;
 
-// Password list layout
 const PasswordsLayout = styled.div`
   display: grid;
   grid-template-columns: ${props => props.isMobile ? '1fr' : '1fr 2fr'};
@@ -465,7 +445,6 @@ const PasswordItem = styled.div`
   }
 `;
 
-// Function to get category color
 const getCategoryColor = (category) => {
   const categoryColors = {
     'Email': { bg: 'rgba(76, 175, 80, 0.2)', text: '#4caf50' },
@@ -529,7 +508,6 @@ const NoPasswordsMessage = styled.div`
   font-size: 0.9rem;
 `;
 
-// Password details components
 const PasswordDetailsSection = styled.div`
   background: rgba(30, 30, 70, 0.3);
   border-radius: 12px;
@@ -614,7 +592,6 @@ const ErrorMessage = styled.div`
   margin-bottom: 1rem;
 `;
 
-// Header components
 const Header = styled.header`
   display: flex;
   justify-content: space-between;
@@ -841,7 +818,6 @@ const DisconnectButton = styled.button`
   }
 `;
 
-// Search and actions
 const ActionsContainer = styled.div`
   display: flex;
   gap: 1rem;

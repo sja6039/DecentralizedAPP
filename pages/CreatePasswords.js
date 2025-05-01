@@ -1,9 +1,9 @@
 /*
- * Create Password page for KeyForge
+ * Create Password page
  * This page allows users to create and securely store new passwords
  * Users can generate strong passwords, categorize them, and add details
  */
-import { useState, useEffect } from 'react';
+import { useState} from 'react';
 import styled from 'styled-components';
 import { useRouter } from 'next/router';
 import Navbar from '@/components/Dashboard/Navbar';
@@ -44,7 +44,6 @@ export default function CreatePassword() {
   const [isCopied, setIsCopied] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [strength, setStrength] = useState(0);
-  // Add state for error messages
   const [errorMessage, setErrorMessage] = useState('');
 
   const generatePassword = () => {
@@ -137,7 +136,6 @@ export default function CreatePassword() {
     setIsPasswordVisible(!isPasswordVisible);
   };
 
-  // If wallet is not connected, show connection prompt
   if (!walletAddress) {
     return (
       <Container>
@@ -367,14 +365,12 @@ export default function CreatePassword() {
   );
 }
 
-// Icon Component for Wallet
 const WalletIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M19 7V5C19 3.89543 18.1046 3 17 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H17C18.1046 21 19 20.1046 19 19V17M21 12H13C12.4477 12 12 12.4477 12 13V16C12 16.5523 12.4477 17 13 17H21C21.5523 17 22 16.5523 22 16V13C22 12.4477 21.5523 12 21 12ZM16 14.5C16 15.0523 15.5523 15.5 15 15.5C14.4477 15.5 14 15.0523 14 14.5C14 13.9477 14.4477 13.5 15 13.5C15.5523 13.5 16 13.9477 16 14.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-// Styled Components
 const Container = styled.div`
   display: flex;
   flex-direction: column;
