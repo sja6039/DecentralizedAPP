@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { styled } from 'styled-components';
 import { useRouter } from 'next/router';
-import { Eye, EyeOff, Copy, Search, Lock, Edit, Trash2, Plus, ChevronLeft } from 'lucide-react';
+import { Eye, EyeOff, Copy, Search, Lock, Trash2, ChevronLeft } from 'lucide-react';
 import Navbar from "@/components/Dashboard/Navbar";
 import { useWallet } from '@/contexts/WalletContext';
 // Import contract service functions
@@ -126,10 +126,6 @@ export default function ViewPasswords() {
     }
   };
 
-  const handleEditPassword = (passwordId) => {
-    // Redirect to edit password page with ID
-    router.push(`/EditPassword?id=${passwordId}`);
-  };
 
   // If wallet is not connected, show connection prompt
   if (!walletAddress) {
@@ -305,10 +301,6 @@ export default function ViewPasswords() {
                 </DetailGrid>
                 
                 <ButtonsContainer>
-                  <EditButton onClick={() => handleEditPassword(selectedPassword.id)}>
-                    <Edit size={16} />
-                    Edit Password
-                  </EditButton>
                   <DeleteButton onClick={() => handleDeletePassword(selectedPassword.id)}>
                     <Trash2 size={16} />
                     Delete
@@ -792,17 +784,6 @@ const Button = styled.button`
   
   &:hover {
     transform: translateY(-2px);
-  }
-`;
-
-const EditButton = styled(Button)`
-  flex: 1;
-  background: linear-gradient(to right, #7b2cbf, #5a189a);
-  color: white;
-  border: none;
-  
-  &:hover {
-    box-shadow: 0 4px 12px rgba(90, 24, 154, 0.3);
   }
 `;
 
