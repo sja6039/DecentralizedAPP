@@ -1,20 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { styled } from 'styled-components';
-import { Eye, EyeOff, Copy, Search, Lock, Wallet, Edit, Trash2, Plus, ChevronLeft } from 'lucide-react';
+import { useRouter } from 'next/router';
+import { Eye, EyeOff, Copy, Search, Lock, Edit, Trash2, Plus, ChevronLeft } from 'lucide-react';
 import Navbar from "@/components/Dashboard/Navbar";
+import { useWallet } from '@/contexts/WalletContext';
 
 export default function ViewPasswords() {
-  const [walletAddress, setWalletAddress] = useState('');
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [connectionError, setConnectionError] = useState('');
+  const { 
+    walletAddress, 
+    connectWallet, 
+    isConnecting,
+    connectionError, 
+    formatWalletAddress,
+    disconnectWallet
+  } = useWallet();
+  
+  const router = useRouter();
+  
   const [selectedPassword, setSelectedPassword] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredPasswords, setFilteredPasswords] = useState([]);
   const [isCopied, setIsCopied] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileDetail, setShowMobileDetail] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Sample password data - in a real implementation, this would be fetched
   // from blockchain/IPFS after wallet connection and decrypted client-side
@@ -61,72 +71,7 @@ export default function ViewPasswords() {
     };
   }, []);
 
-  const checkIfWalletIsConnected = async () => {
-    try {
-      const { ethereum } = window;
-      if (!ethereum) {
-        console.log("Make sure you have MetaMask installed!");
-        return;
-      }
-      
-      const accounts = await ethereum.request({ method: "eth_accounts" });
-      if (accounts.length !== 0) {
-        const account = accounts[0];
-        console.log("Found an authorized account:", account);
-        setWalletAddress(account);
-        setIsLoading(true);
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 1000);
-      } else {
-        console.log("No authorized account found");
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  // Connect wallet
-  const connectWallet = async () => {
-    try {
-      setIsConnecting(true);
-      setConnectionError('');
-      const { ethereum } = window;
-      if (!ethereum) {
-        setConnectionError('MetaMask is not installed. Please install MetaMask to use this application.');
-        setIsConnecting(false);
-        return;
-      }
-      
-      const accounts = await ethereum.request({ method: "eth_requestAccounts" });
-      if (accounts.length !== 0) {
-        const account = accounts[0];
-        console.log("Connected to account:", account);
-        setWalletAddress(account);
-        setIsLoading(true);
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 1000);
-      } else {
-        setConnectionError('No accounts found or access denied.');
-      }
-    } catch (error) {
-      console.log(error);
-      setConnectionError('Failed to connect wallet. Please try again.');
-    } finally {
-      setIsConnecting(false);
-    }
-  };
-
-  const disconnectWallet = () => {
-    setWalletAddress('');
-    setSelectedPassword(null);
-  };
-
-  useEffect(() => {
-    checkIfWalletIsConnected();
-  }, []);
-
+  // Filter passwords based on search query
   useEffect(() => {
     if (!walletAddress) return;
     if (searchQuery) {
@@ -148,11 +93,6 @@ export default function ViewPasswords() {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const formatWalletAddress = (address) => {
-    if (!address) return '';
-    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
-  };
-
   const handlePasswordSelect = (password) => {
     setSelectedPassword(password);
     if (isMobile) {
@@ -163,195 +103,202 @@ export default function ViewPasswords() {
   const handleBackToList = () => {
     setShowMobileDetail(false);
   };
+  
+  const handleAddPassword = () => {
+    router.push('/CreatePassword');
+  };
+
+  // If wallet is not connected, show connection prompt like in CreatePassword component
+  if (!walletAddress) {
+    return (
+      <Container>
+        <Navbar />
+        <WalletConnectionSection>
+          <LockIcon>
+            <Lock size={60} />
+          </LockIcon>
+          <ConnectionTitle>Connect Your Wallet to View Passwords</ConnectionTitle>
+          <ConnectionDescription>
+            KeyForge uses blockchain technology to securely store your passwords.
+            Connect your MetaMask wallet to decrypt and access your passwords.
+          </ConnectionDescription>
+          <ConnectButton
+            onClick={connectWallet}
+            disabled={isConnecting}
+          >
+            {isConnecting ? 'Connecting...' : 'Connect MetaMask Wallet'}
+            <WalletIcon />
+          </ConnectButton>
+          {connectionError && <ErrorMessage>{connectionError}</ErrorMessage>}
+        </WalletConnectionSection>
+      </Container>
+    );
+  }
 
   return (
     <Container>
       <Navbar />
-
       <MainContent>
-        {!walletAddress ? (
-          <WalletConnectionSection>
-            <LockIcon>
-              <Lock size={60} />
-            </LockIcon>
-            <ConnectionTitle>Connect Your Wallet to View Passwords</ConnectionTitle>
-            <ConnectionDescription>
-              KeyForge uses blockchain technology to securely store your passwords.
-              Connect your MetaMask wallet to decrypt and access your passwords.
-            </ConnectionDescription>
-            <ConnectButton
-              onClick={connectWallet}
-              disabled={isConnecting}
-            >
-              {isConnecting ? 'Connecting...' : 'Connect MetaMask Wallet'}
-              <Wallet size={20} />
-            </ConnectButton>
-            {connectionError && <ErrorMessage>{connectionError}</ErrorMessage>}
-          </WalletConnectionSection>
+        <Header>
+          <HeaderLeft>
+            <Title>Your Passwords</Title>
+            <WalletInfo>
+              <WalletAddress>{formatWalletAddress(walletAddress)}</WalletAddress>
+              <DisconnectButton onClick={disconnectWallet}>Disconnect</DisconnectButton>
+            </WalletInfo>
+          </HeaderLeft>
+          <ActionsContainer>
+            <SearchContainer>
+              <SearchIcon>
+                <Search size={16} />
+              </SearchIcon>
+              <SearchInput
+                type="text"
+                placeholder="Search passwords..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </SearchContainer>
+            <AddPasswordButton onClick={handleAddPassword}>
+              <Plus size={16} />
+              Add Password
+            </AddPasswordButton>
+          </ActionsContainer>
+        </Header>
+        
+        {isLoading ? (
+          <LoadingContainer>
+            <LoadingSpinner />
+            <LoadingText>Decrypting your passwords...</LoadingText>
+          </LoadingContainer>
         ) : (
-          <>
-            <Header>
-              <HeaderLeft>
-                <Title>Your Passwords</Title>
-                <WalletInfo>
-                  <WalletAddress>{formatWalletAddress(walletAddress)}</WalletAddress>
-                  <DisconnectButton onClick={disconnectWallet}>Disconnect</DisconnectButton>
-                </WalletInfo>
-              </HeaderLeft>
-              <ActionsContainer>
-                <SearchContainer>
-                  <SearchIcon>
-                    <Search size={16} />
-                  </SearchIcon>
-                  <SearchInput
-                    type="text"
-                    placeholder="Search passwords..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </SearchContainer>
-                <AddPasswordButton>
-                  <Plus size={16} />
-                  Add Password
-                </AddPasswordButton>
-              </ActionsContainer>
-            </Header>
+          <PasswordsLayout 
+            isMobile={isMobile} 
+            showMobileDetail={showMobileDetail}
+          >
+            {(!isMobile || (isMobile && !showMobileDetail)) && (
+              <PasswordsList>
+                {filteredPasswords.map(password => (
+                  <PasswordItem
+                    key={password.id}
+                    onClick={() => handlePasswordSelect(password)}
+                    isSelected={selectedPassword && selectedPassword.id === password.id}
+                  >
+                    <CategoryIcon category={password.category}>
+                      {password.category.charAt(0)}
+                    </CategoryIcon>
+                    <PasswordItemContent>
+                      <PasswordName>{password.name}</PasswordName>
+                      <PasswordUsername>{password.username}</PasswordUsername>
+                    </PasswordItemContent>
+                    <PasswordCategory>{password.category}</PasswordCategory>
+                  </PasswordItem>
+                ))}
+                
+                {filteredPasswords.length === 0 && (
+                  <NoPasswordsMessage>
+                    {searchQuery
+                      ? `No passwords found matching "${searchQuery}"`
+                      : "No passwords found. Create your first password to get started."
+                    }
+                  </NoPasswordsMessage>
+                )}
+              </PasswordsList>
+            )}
             
-            {isLoading ? (
-              <LoadingContainer>
-                <LoadingSpinner />
-                <LoadingText>Decrypting your passwords...</LoadingText>
-              </LoadingContainer>
-            ) : (
-              <PasswordsLayout 
-                isMobile={isMobile} 
-                showMobileDetail={showMobileDetail}
-              >
-                {(!isMobile || (isMobile && !showMobileDetail)) && (
-                  <PasswordsList>
-                    {filteredPasswords.map(password => (
-                      <PasswordItem
-                        key={password.id}
-                        onClick={() => handlePasswordSelect(password)}
-                        isSelected={selectedPassword && selectedPassword.id === password.id}
-                      >
-                        <CategoryIcon category={password.category}>
-                          {password.category.charAt(0)}
-                        </CategoryIcon>
-                        <PasswordItemContent>
-                          <PasswordName>{password.name}</PasswordName>
-                          <PasswordUsername>{password.username}</PasswordUsername>
-                        </PasswordItemContent>
-                        <PasswordCategory>{password.category}</PasswordCategory>
-                      </PasswordItem>
-                    ))}
-                    
-                    {filteredPasswords.length === 0 && (
-                      <NoPasswordsMessage>
-                        {searchQuery
-                          ? `No passwords found matching "${searchQuery}"`
-                          : "No passwords found. Create your first password to get started."
-                        }
-                      </NoPasswordsMessage>
-                    )}
-                  </PasswordsList>
+            {(!isMobile || (isMobile && showMobileDetail)) && selectedPassword ? (
+              <PasswordDetailsSection>
+                {isMobile && (
+                  <BackButton onClick={handleBackToList}>
+                    <ChevronLeft size={18} />
+                    Back to list
+                  </BackButton>
                 )}
                 
-                {(!isMobile || (isMobile && showMobileDetail)) && selectedPassword ? (
-                  <PasswordDetailsSection>
-                    {isMobile && (
-                      <BackButton onClick={handleBackToList}>
-                        <ChevronLeft size={18} />
-                        Back to list
-                      </BackButton>
-                    )}
-                    
-                    <DetailsHeader>
-                      <DetailsTitle>{selectedPassword.name}</DetailsTitle>
-                      <CategoryBadge>{selectedPassword.category}</CategoryBadge>
-                    </DetailsHeader>
-                    
-                    <DetailGrid>
-                      <DetailItem>
-                        <DetailLabel>Username / Email</DetailLabel>
-                        <DetailValueWithAction>
-                          <DetailValue>{selectedPassword.username}</DetailValue>
-                          <DetailAction 
-                            onClick={() => copyToClipboard(selectedPassword.username)}
-                            title="Copy username"
-                          >
-                            <Copy size={16} />
-                          </DetailAction>
-                        </DetailValueWithAction>
-                      </DetailItem>
-                      
-                      <DetailItem>
-                        <DetailLabel>Password</DetailLabel>
-                        <DetailValueWithAction>
-                          <PasswordValue isVisible={showPassword}>
-                            {showPassword ? selectedPassword.password : '••••••••••••'}
-                          </PasswordValue>
-                          <DetailActions>
-                            <DetailAction
-                              onClick={() => setShowPassword(!showPassword)}
-                              title={showPassword ? "Hide password" : "Show password"}
-                            >
-                              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                            </DetailAction>
-                            <DetailAction
-                              onClick={() => copyToClipboard(selectedPassword.password)}
-                              title="Copy password"
-                            >
-                              <Copy size={16} />
-                            </DetailAction>
-                          </DetailActions>
-                        </DetailValueWithAction>
-                        {isCopied && <CopiedMessage>Copied to clipboard!</CopiedMessage>}
-                      </DetailItem>
-                      
-                      <DetailItem>
-                        <DetailLabel>Website</DetailLabel>
-                        <DetailValueWithAction>
-                          <DetailValue>{selectedPassword.website}</DetailValue>
-                          <DetailAction
-                            onClick={() => window.open(selectedPassword.website, '_blank')}
-                            title="Visit website"
-                          >
-                            <ExternalLinkIcon />
-                          </DetailAction>
-                        </DetailValueWithAction>
-                      </DetailItem>
-                      
-                      {selectedPassword.notes && (
-                        <DetailItem fullWidth>
-                          <DetailLabel>Notes</DetailLabel>
-                          <NotesValue>{selectedPassword.notes}</NotesValue>
-                        </DetailItem>
-                      )}
-                    </DetailGrid>
-                    
-                    <ButtonsContainer>
-                      <EditButton>
-                        <Edit size={16} />
-                        Edit Password
-                      </EditButton>
-                      <DeleteButton>
-                        <Trash2 size={16} />
-                        Delete
-                      </DeleteButton>
-                    </ButtonsContainer>
-                  </PasswordDetailsSection>
-                ) : (
-                  !isMobile && (
-                    <NoSelectionMessage>
-                      <EmptyStateIcon />
-                      <p>Select a password from the list to view details</p>
-                    </NoSelectionMessage>
-                  )
-                )}
-              </PasswordsLayout>
+                <DetailsHeader>
+                  <DetailsTitle>{selectedPassword.name}</DetailsTitle>
+                  <CategoryBadge>{selectedPassword.category}</CategoryBadge>
+                </DetailsHeader>
+                
+                <DetailGrid>
+                  <DetailItem>
+                    <DetailLabel>Username / Email</DetailLabel>
+                    <DetailValueWithAction>
+                      <DetailValue>{selectedPassword.username}</DetailValue>
+                      <DetailAction 
+                        onClick={() => copyToClipboard(selectedPassword.username)}
+                        title="Copy username"
+                      >
+                        <Copy size={16} />
+                      </DetailAction>
+                    </DetailValueWithAction>
+                  </DetailItem>
+                  
+                  <DetailItem>
+                    <DetailLabel>Password</DetailLabel>
+                    <DetailValueWithAction>
+                      <PasswordValue isVisible={showPassword}>
+                        {showPassword ? selectedPassword.password : '••••••••••••'}
+                      </PasswordValue>
+                      <DetailActions>
+                        <DetailAction
+                          onClick={() => setShowPassword(!showPassword)}
+                          title={showPassword ? "Hide password" : "Show password"}
+                        >
+                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </DetailAction>
+                        <DetailAction
+                          onClick={() => copyToClipboard(selectedPassword.password)}
+                          title="Copy password"
+                        >
+                          <Copy size={16} />
+                        </DetailAction>
+                      </DetailActions>
+                    </DetailValueWithAction>
+                    {isCopied && <CopiedMessage>Copied to clipboard!</CopiedMessage>}
+                  </DetailItem>
+                  
+                  <DetailItem>
+                    <DetailLabel>Website</DetailLabel>
+                    <DetailValueWithAction>
+                      <DetailValue>{selectedPassword.website}</DetailValue>
+                      <DetailAction
+                        onClick={() => window.open(selectedPassword.website, '_blank')}
+                        title="Visit website"
+                      >
+                        <ExternalLinkIcon />
+                      </DetailAction>
+                    </DetailValueWithAction>
+                  </DetailItem>
+                  
+                  {selectedPassword.notes && (
+                    <DetailItem fullWidth>
+                      <DetailLabel>Notes</DetailLabel>
+                      <NotesValue>{selectedPassword.notes}</NotesValue>
+                    </DetailItem>
+                  )}
+                </DetailGrid>
+                
+                <ButtonsContainer>
+                  <EditButton>
+                    <Edit size={16} />
+                    Edit Password
+                  </EditButton>
+                  <DeleteButton>
+                    <Trash2 size={16} />
+                    Delete
+                  </DeleteButton>
+                </ButtonsContainer>
+              </PasswordDetailsSection>
+            ) : (
+              !isMobile && (
+                <NoSelectionMessage>
+                  <EmptyStateIcon />
+                  <p>Select a password from the list to view details</p>
+                </NoSelectionMessage>
+              )
             )}
-          </>
+          </PasswordsLayout>
         )}
       </MainContent>
     </Container>
@@ -359,6 +306,11 @@ export default function ViewPasswords() {
 }
 
 // Icon Components
+const WalletIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M19 7V5C19 3.89543 18.1046 3 17 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H17C18.1046 21 19 20.1046 19 19V17M21 12H13C12.4477 12 12 12.4477 12 13V16C12 16.5523 12.4477 17 13 17H21C21.5523 17 22 16.5523 22 16V13C22 12.4477 21.5523 12 21 12ZM16 14.5C16 15.0523 15.5523 15.5 15 15.5C14.4477 15.5 14 15.0523 14 14.5C14 13.9477 14.4477 13.5 15 13.5C15.5523 13.5 16 13.9477 16 14.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 
 const ExternalLinkIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -381,39 +333,9 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: linear-gradient(135deg, #16163f 0%, #1e1e4a 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   color: #f0f0ff;
-  font-family: 'Inter', system-ui, sans-serif;
-`;
-
-// Using imported Navbar component instead of styling one here
-
-const WalletAddress = styled.div`
-  font-size: 0.85rem;
-  color: #d8bfff;
-  background: rgba(123, 44, 191, 0.1);
-  padding: 0.4rem 0.8rem;
-  border-radius: 12px;
-  border: 1px solid rgba(123, 44, 191, 0.3);
-
-  @media (max-width: 768px) {
-    display: none;
-  }
-`;
-
-const DisconnectButton = styled.button`
-  background: transparent;
-  border: 1px solid rgba(123, 44, 191, 0.3);
-  color: #d8bfff;
-  padding: 0.4rem 0.8rem;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: rgba(123, 44, 191, 0.1);
-  }
+  font-family: 'Roboto', sans-serif;
 `;
 
 const MainContent = styled.main`
@@ -427,6 +349,7 @@ const MainContent = styled.main`
   }
 `;
 
+// Wallet connection styled components - Matches CreatePassword component
 const WalletConnectionSection = styled.div`
   display: flex;
   flex-direction: column;
@@ -438,12 +361,13 @@ const WalletConnectionSection = styled.div`
   border-radius: 16px;
   border: 1px solid rgba(123, 44, 191, 0.2);
   max-width: 480px;
-  margin: 2rem auto;
+  margin: 4rem auto;
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 
   @media (max-width: 768px) {
     padding: 2rem 1.5rem;
+    margin: 2rem 1rem;
   }
 `;
 
@@ -516,6 +440,32 @@ const ErrorMessage = styled.div`
   text-align: left;
 `;
 
+// Empty state components
+const EmptyStateContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 5rem 2rem;
+  text-align: center;
+`;
+
+const EmptyStateTitle = styled.h2`
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.5rem;
+  background: linear-gradient(to right, #9d4edd, #5a189a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+`;
+
+const EmptyStateDescription = styled.p`
+  font-size: 1.1rem;
+  color: #b0b0cc;
+  max-width: 400px;
+`;
+
+// Header components
 const Header = styled.header`
   display: flex;
   justify-content: space-between;
@@ -532,264 +482,6 @@ const Header = styled.header`
 const HeaderLeft = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-`;
-
-const WalletInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-`;
-
-const Title = styled.h1`
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin: 0;
-  background: linear-gradient(to right, #9d4edd, #5a189a);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-`;
-
-const ActionsContainer = styled.div`
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  
-  @media (max-width: 768px) {
-    width: 100%;
-  }
-`;
-
-const SearchContainer = styled.div`
-  position: relative;
-  width: 280px;
-  
-  @media (max-width: 768px) {
-    flex: 1;
-  }
-`;
-
-const SearchIcon = styled.div`
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #7b2cbf;
-`;
-
-const SearchInput = styled.input`
-  width: 100%;
-  padding: 0.6rem 0.6rem 0.6rem 2rem;
-  background: rgba(30, 30, 70, 0.4);
-  color: #f0f0ff;
-  border: 1px solid rgba(123, 44, 191, 0.3);
-  border-radius: 8px;
-  font-size: 0.9rem;
-  
-  &:focus {
-    outline: none;
-    border-color: #7b2cbf;
-    box-shadow: 0 0 0 2px rgba(123, 44, 191, 0.2);
-  }
-  
-  &::placeholder {
-    color: rgba(176, 176, 204, 0.6);
-  }
-`;
-
-const AddPasswordButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: linear-gradient(to right, #7b2cbf, #5a189a);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.6rem 1rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(90, 24, 154, 0.3);
-  }
-`;
-
-const LoadingContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 300px;
-  gap: 1.5rem;
-`;
-
-const LoadingSpinner = styled.div`
-  border: 3px solid rgba(123, 44, 191, 0.1);
-  border-top: 3px solid #7b2cbf;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-`;
-
-const LoadingText = styled.div`
-  color: #d8bfff;
-  font-size: 1.1rem;
-`;
-
-const PasswordsLayout = styled.div`
-  display: grid;
-  grid-template-columns: ${props => props.isMobile ? '1fr' : '1fr 2fr'};
-  gap: 1.5rem;
-  
-  @media (max-width: 992px) {
-    grid-template-columns: ${props => props.isMobile && props.showMobileDetail ? '1fr' : (props.isMobile ? '1fr' : '1fr 1fr')};
-  }
-`;
-
-const PasswordsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  background: rgba(30, 30, 70, 0.3);
-  border-radius: 12px;
-  padding: 1rem;
-  border: 1px solid rgba(123, 44, 191, 0.2);
-  height: fit-content;
-  max-height: 70vh;
-  overflow-y: auto;
-  
-  /* Custom scrollbar */
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: rgba(30, 30, 70, 0.1);
-    border-radius: 10px;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: rgba(123, 44, 191, 0.3);
-    border-radius: 10px;
-  }
-  
-  &::-webkit-scrollbar-thumb:hover {
-    background: rgba(123, 44, 191, 0.5);
-  }
-`;
-
-const PasswordItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background-color: ${props => props.isSelected ? 'rgba(123, 44, 191, 0.2)' : 'rgba(30, 30, 70, 0.5)'};
-  border: 1px solid ${props => props.isSelected ? 'rgba(123, 44, 191, 0.4)' : 'transparent'};
-  
-  &:hover {
-    background-color: rgba(123, 44, 191, 0.1);
-  }
-`;
-
-const getCategoryColor = (category) => {
-  const categoryColors = {
-    'Email': { bg: 'rgba(76, 175, 80, 0.2)', text: '#4caf50' },
-    'Shopping': { bg: 'rgba(255, 152, 0, 0.2)', text: '#ff9800' },
-    'Banking': { bg: 'rgba(33, 150, 243, 0.2)', text: '#2196f3' },
-    'Social': { bg: 'rgba(156, 39, 176, 0.2)', text: '#9c27b0' },
-    'Work': { bg: 'rgba(233, 30, 99, 0.2)', text: '#e91e63' },
-  };
-  
-  return categoryColors[category] || { bg: 'rgba(123, 44, 191, 0.2)', text: '#7b2cbf' };
-};
-
-const CategoryIcon = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  background-color: ${props => getCategoryColor(props.category).bg};
-  color: ${props => getCategoryColor(props.category).text};
-  font-weight: 600;
-  font-size: 0.9rem;
-`;
-
-const PasswordItemContent = styled.div`
-  flex: 1;
-  overflow: hidden;
-`;
-
-const PasswordName = styled.div`
-  font-weight: 500;
-  font-size: 0.95rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 0.3rem;
-`;
-
-const PasswordUsername = styled.div`
-  font-size: 0.8rem;
-  color: #b0b0cc;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
-
-const PasswordCategory = styled.span`
-  background-color: rgba(123, 44, 191, 0.1);
-  color: #d8bfff;
-  font-size: 0.7rem;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  white-space: nowrap;
-`;
-
-const NoPasswordsMessage = styled.div`
-  padding: 2rem;
-  text-align: center;
-  color: #b0b0cc;
-  font-size: 0.9rem;
-`;
-
-const BackButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: transparent;
-  border: 1px solid rgba(123, 44, 191, 0.3);
-  color: #d8bfff;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  margin-bottom: 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    background: rgba(123, 44, 191, 0.1);
-  }
-`;
-
-const PasswordDetailsSection = styled.div`
-  background: rgba(30, 30, 70, 0.3);
-  border-radius: 12px;
-  padding: 1.5rem;
-  border: 1px solid rgba(123, 44, 191, 0.2);
 `;
 
 const NoSelectionMessage = styled.div`
@@ -893,10 +585,12 @@ const DetailAction = styled.button`
 `;
 
 const PasswordValue = styled.div`
-  font-family: 'JetBrains Mono', monospace;
+  font-family: monospace;
   font-size: 0.95rem;
   color: ${props => props.isVisible ? '#d8bfff' : '#b0b0cc'};
   letter-spacing: ${props => props.isVisible ? 'normal' : '0.15rem'};
+  padding: 0.75rem;
+  flex: 1;
 `;
 
 const NotesValue = styled.div`
@@ -963,5 +657,293 @@ const DeleteButton = styled(Button)`
   
   &:hover {
     background: rgba(255, 71, 87, 0.1);
+  }
+`;
+
+const WalletInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const Title = styled.h1`
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  background: linear-gradient(to right, #9d4edd, #5a189a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+`;
+
+const WalletAddress = styled.div`
+  font-size: 0.85rem;
+  color: #d8bfff;
+  background: rgba(123, 44, 191, 0.1);
+  padding: 0.4rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid rgba(123, 44, 191, 0.3);
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const DisconnectButton = styled.button`
+  background: transparent;
+  border: 1px solid rgba(123, 44, 191, 0.3);
+  color: #d8bfff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(123, 44, 191, 0.1);
+  }
+`;
+
+// Search and actions
+const ActionsContainer = styled.div`
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+`;
+
+const SearchContainer = styled.div`
+  position: relative;
+  width: 280px;
+  
+  @media (max-width: 768px) {
+    flex: 1;
+  }
+`;
+
+const SearchIcon = styled.div`
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #7b2cbf;
+`;
+
+const SearchInput = styled.input`
+  width: 100%;
+  padding: 0.6rem 0.6rem 0.6rem 2rem;
+  background: rgba(30, 30, 70, 0.4);
+  color: #f0f0ff;
+  border: 1px solid rgba(123, 44, 191, 0.3);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  
+  &:focus {
+    outline: none;
+    border-color: #7b2cbf;
+    box-shadow: 0 0 0 2px rgba(123, 44, 191, 0.2);
+  }
+  
+  &::placeholder {
+    color: rgba(176, 176, 204, 0.6);
+  }
+`;
+
+const AddPasswordButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(to right, #7b2cbf, #5a189a);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(90, 24, 154, 0.3);
+  }
+`;
+
+// Loading components
+const LoadingContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  gap: 1.5rem;
+`;
+
+const LoadingSpinner = styled.div`
+  border: 3px solid rgba(123, 44, 191, 0.1);
+  border-top: 3px solid #7b2cbf;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+const LoadingText = styled.div`
+  color: #d8bfff;
+  font-size: 1.1rem;
+`;
+
+// Password list layout
+const PasswordsLayout = styled.div`
+  display: grid;
+  grid-template-columns: ${props => props.isMobile ? '1fr' : '1fr 2fr'};
+  gap: 1.5rem;
+  
+  @media (max-width: 992px) {
+    grid-template-columns: ${props => props.isMobile && props.showMobileDetail ? '1fr' : (props.isMobile ? '1fr' : '1fr 1fr')};
+  }
+`;
+
+const PasswordsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: rgba(30, 30, 70, 0.3);
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid rgba(123, 44, 191, 0.2);
+  height: fit-content;
+  max-height: 70vh;
+  overflow-y: auto;
+  
+  /* Custom scrollbar */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(30, 30, 70, 0.1);
+    border-radius: 10px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(123, 44, 191, 0.3);
+    border-radius: 10px;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(123, 44, 191, 0.5);
+  }
+`;
+
+const PasswordItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: ${props => props.isSelected ? 'rgba(123, 44, 191, 0.2)' : 'rgba(30, 30, 70, 0.5)'};
+  border: 1px solid ${props => props.isSelected ? 'rgba(123, 44, 191, 0.4)' : 'transparent'};
+  
+  &:hover {
+    background-color: rgba(123, 44, 191, 0.1);
+  }
+`;
+
+// Function to get category color
+const getCategoryColor = (category) => {
+  const categoryColors = {
+    'Email': { bg: 'rgba(76, 175, 80, 0.2)', text: '#4caf50' },
+    'Shopping': { bg: 'rgba(255, 152, 0, 0.2)', text: '#ff9800' },
+    'Banking': { bg: 'rgba(33, 150, 243, 0.2)', text: '#2196f3' },
+    'Social': { bg: 'rgba(156, 39, 176, 0.2)', text: '#9c27b0' },
+    'Work': { bg: 'rgba(233, 30, 99, 0.2)', text: '#e91e63' },
+  };
+  
+  return categoryColors[category] || { bg: 'rgba(123, 44, 191, 0.2)', text: '#7b2cbf' };
+};
+
+const CategoryIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background-color: ${props => getCategoryColor(props.category).bg};
+  color: ${props => getCategoryColor(props.category).text};
+  font-weight: 600;
+  font-size: 0.9rem;
+`;
+
+const PasswordItemContent = styled.div`
+  flex: 1;
+  overflow: hidden;
+`;
+
+const PasswordName = styled.div`
+  font-weight: 500;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.3rem;
+`;
+
+const PasswordUsername = styled.div`
+  font-size: 0.8rem;
+  color: #b0b0cc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const PasswordCategory = styled.span`
+  background-color: rgba(123, 44, 191, 0.1);
+  color: #d8bfff;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  white-space: nowrap;
+`;
+
+const NoPasswordsMessage = styled.div`
+  padding: 2rem;
+  text-align: center;
+  color: #b0b0cc;
+  font-size: 0.9rem;
+`;
+
+// Password details components
+const PasswordDetailsSection = styled.div`
+  background: rgba(30, 30, 70, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid rgba(123, 44, 191, 0.2);
+`;
+
+const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  padding: 0.5rem;
+  border: none;
+  color: #d8bfff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  
+  &:hover {
+    text-decoration: underline;
   }
 `;

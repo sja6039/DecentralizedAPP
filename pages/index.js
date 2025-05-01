@@ -96,41 +96,6 @@ export default function Home() {
           </FeatureCard>
         </FeaturesGrid>
       </FeaturesSection>
-
-      <HowItWorksSection>
-        <SectionTitle>How It Works</SectionTitle>
-        <StepContainer>
-          <Step>
-            <StepNumber>1</StepNumber>
-            <StepContent>
-              <StepTitle>Connect Your Wallet</StepTitle>
-              <StepDescription>
-                Use MetaMask to authenticate securely with blockchain technology.
-              </StepDescription>
-            </StepContent>
-          </Step>
-          
-          <Step>
-            <StepNumber>2</StepNumber>
-            <StepContent>
-              <StepTitle>Store Your Passwords</StepTitle>
-              <StepDescription>
-                Create and store encrypted passwords that only you can access with your private keys.
-              </StepDescription>
-            </StepContent>
-          </Step>
-          
-          <Step>
-            <StepNumber>3</StepNumber>
-            <StepContent>
-              <StepTitle>Access Anywhere</StepTitle>
-              <StepDescription>
-                Securely access your passwords from any device by connecting your wallet.
-              </StepDescription>
-            </StepContent>
-          </Step>
-        </StepContainer>
-      </HowItWorksSection>
     </Container>
   );
 }
@@ -413,66 +378,3 @@ const FeatureDescription = styled.p`
   color: #b0b0cc;
 `;
 
-const HowItWorksSection = styled.section`
-  padding: 6rem 2rem;
-  background: linear-gradient(to bottom, rgba(30, 30, 60, 0.3), transparent);
-  max-width: 1400px;
-  margin: 0 auto;
-  
-  @media (max-width: 768px) {
-    padding: 4rem 1rem;
-  }
-`;
-
-const StepContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  max-width: 800px;
-  margin: 0 auto;
-`;
-
-const Step = styled.div`
-  display: flex;
-  gap: 2rem;
-  align-items: flex-start;
-  
-  @media (max-width: 576px) {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-`;
-
-const StepNumber = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 60px;
-  height: 60px;
-  min-width: 60px;
-  background: linear-gradient(135deg, #7b2cbf 0%, #5a189a 100%);
-  border-radius: 50%;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: white;
-  box-shadow: 0 5px 15px rgba(90, 24, 154, 0.3);
-`;
-
-const StepContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-`;
-
-const StepTitle = styled.h3`
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #d8bfff;
-`;
-
-const StepDescription = styled.p`
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #b0b0cc;
-`;

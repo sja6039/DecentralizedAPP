@@ -43,26 +43,6 @@ export default function CreatePassword() {
   const [isCopied, setIsCopied] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [strength, setStrength] = useState(0);
-  
-  // Redirect to homepage if wallet is not connected
-  useEffect(() => {
-    const checkWalletConnection = () => {
-      if (!walletAddress && !isConnecting) {
-        // Show a message or confirm dialog before redirecting
-        const shouldRedirect = window.confirm(
-          "You need to connect your wallet to create passwords. Redirect to homepage?"
-        );
-        
-        if (shouldRedirect) {
-          router.push('/');
-        }
-      }
-    };
-    
-    // Small delay to prevent immediate check on initial load
-    const timer = setTimeout(checkWalletConnection, 1000);
-    return () => clearTimeout(timer);
-  }, [walletAddress, isConnecting, router]);
 
   const generatePassword = () => {
     const chars = [
