@@ -9,6 +9,7 @@ import { useRouter } from 'next/router';
 import Navbar from '@/components/Dashboard/Navbar';
 import { useWallet } from '@/contexts/WalletContext';
 import { Lock, Shield, RefreshCw, Copy, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { addPassword } from './contractService';
 
 const passwordCategories = [
   "Social Media",
@@ -43,6 +44,8 @@ export default function CreatePassword() {
   const [isCopied, setIsCopied] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [strength, setStrength] = useState(0);
+  // Add state for error messages
+  const [errorMessage, setErrorMessage] = useState('');
 
   const generatePassword = () => {
     const chars = [
@@ -51,12 +54,7 @@ export default function CreatePassword() {
       includeNumbers ? '0123456789' : '',
       includeSymbols ? '!@#$%^&*()_+~`|}{[]:;?><,./-=' : ''
     ].join('');
-    
-    if (!chars.length) {
-      alert('Please select at least one character type');
-      return;
-    }
-    
+        
     let password = '';
     for (let i = 0; i < passwordLength; i++) {
       password += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -89,29 +87,50 @@ export default function CreatePassword() {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const handleSave = () => {
+  // Update the handleSave function to use the smart contract
+  const handleSave = async () => {
     if (!passwordName || !generatedPassword || !category) {
-      alert('Please fill in all required fields');
       return;
     }
     
     setIsSaving(true);
+    setErrorMessage('');
     
-    // This would be replaced with actual blockchain storage logic
-    setTimeout(() => {
+    try {
+      // Prepare the password data to be encrypted and stored
+      const passwordData = {
+        name: passwordName,
+        username: username,
+        password: generatedPassword,
+        website: website,
+        notes: notes,
+        createdAt: new Date().toISOString()
+      };
+      
+      // Call the contract service to add the password
+      const result = await addPassword(passwordName, category, passwordData);
+      
+      if (result.success) {
+        // Reset form
+        setPasswordName('');
+        setUsername('');
+        setWebsite('');
+        setNotes('');
+        setCategory('');
+        setGeneratedPassword('');
+        setIsPasswordVisible(false);
+        
+        // Show success message and redirect
+        router.push('/ViewPasswords');
+      } else {
+        setErrorMessage(result.error || 'Failed to save password to the blockchain');
+      }
+    } catch (error) {
+      console.error('Error saving password:', error);
+      setErrorMessage('An unexpected error occurred. Please try again.');
+    } finally {
       setIsSaving(false);
-      // Reset form
-      setPasswordName('');
-      setUsername('');
-      setWebsite('');
-      setNotes('');
-      setCategory('');
-      setGeneratedPassword('');
-      setIsPasswordVisible(false);
-      // Show success message or redirect
-      alert('Password saved successfully!');
-      router.push('/ViewPasswords');
-    }, 2000);
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -155,6 +174,8 @@ export default function CreatePassword() {
             Generate strong, unique passwords and securely store them on the blockchain
           </HeaderDescription>
         </PageHeader>
+
+        {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
 
         <ContentGrid>
           <GeneratorCard>
@@ -332,7 +353,7 @@ export default function CreatePassword() {
             </FormGroup>
 
             <SaveButton onClick={handleSave} disabled={isSaving}>
-              {isSaving ? 'Encrypting & Saving...' : 'Save Password Securely'}
+              {isSaving ? 'Encrypting & Saving to Blockchain...' : 'Save Password Securely'}
             </SaveButton>
 
             <EncryptionNote>
@@ -451,6 +472,7 @@ const ErrorMessage = styled.div`
   border-left: 3px solid #ff4757;
   max-width: 100%;
   text-align: left;
+  margin-bottom: 1rem;
 `;
 
 const PageContent = styled.main`
@@ -663,6 +685,26 @@ const GenerateButton = styled.button`
   &:active {
     transform: translateY(0);
   }
+  
+  &:disabled {
+    background: linear-gradient(to right, #7b2cbf90, #5a189a90);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+`;
+
+const EncryptionNote = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #b0b0cc;
+  margin-top: 1rem;
+  padding: 0.8rem;
+  background: rgba(123, 44, 191, 0.1);
+  border-radius: 6px;
+  border-left: 3px solid #7b2cbf;
 `;
 
 const PasswordResult = styled.div`
@@ -850,25 +892,4 @@ const SaveButton = styled.button`
   
   &:active {
     transform: translateY(0);
-  }
-  
-  &:disabled {
-    background: linear-gradient(to right, #7b2cbf90, #5a189a90);
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-`;
-
-const EncryptionNote = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-  color: #b0b0cc;
-  margin-top: 1rem;
-  padding: 0.8rem;
-  background: rgba(123, 44, 191, 0.1);
-  border-radius: 6px;
-  border-left: 3px solid #7b2cbf;
-`;
+  `;
