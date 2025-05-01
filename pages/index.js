@@ -15,7 +15,7 @@ export default function Home() {
   const handleGetStarted = () => {
     if (walletAddress) {
       // If wallet is connected, redirect to create password page
-      router.push('/CreatePassword');
+      router.push('/CreatePasswords');
     } else {
       // If wallet isn't connected, attempt to connect
       connectWallet();
