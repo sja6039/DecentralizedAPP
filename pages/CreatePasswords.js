@@ -9,7 +9,7 @@ import { useRouter } from 'next/router';
 import Navbar from '@/components/Dashboard/Navbar';
 import { useWallet } from '@/contexts/WalletContext';
 import { Lock, Shield, RefreshCw, Copy, Eye, EyeOff, CheckCircle } from 'lucide-react';
-import { addPassword } from './contractService';
+import { addPassword } from '../services/contractService';
 
 const passwordCategories = [
   "Social Media",

@@ -5,7 +5,7 @@ import { Eye, EyeOff, Copy, Search, Lock, Edit, Trash2, Plus, ChevronLeft } from
 import Navbar from "@/components/Dashboard/Navbar";
 import { useWallet } from '@/contexts/WalletContext';
 // Import contract service functions
-import { getAllPasswords, deletePassword } from './contractService';
+import { getAllPasswords, deletePassword } from '../services/contractService';
 
 export default function ViewPasswords() {
   const { 
