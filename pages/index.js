@@ -1,5 +1,7 @@
 /*
  * Homepage for KeyForge, a decentralized password management system
+ * Describes main functioanlities and featuers
+ * Includes a call to action to connect wallet and get started
  */
 import React from 'react';
 import styled from 'styled-components';

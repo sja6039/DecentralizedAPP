@@ -1,3 +1,8 @@
+/**
+ * Page to view passwords created by the user
+ * uses wallet connection to grab all passwrods created 
+ * method for "deleting" a password which unmarks it and stops viewing it
+ */
 import React, { useState, useEffect } from 'react';
 import { styled } from 'styled-components';
 import { useRouter } from 'next/router';
@@ -17,7 +22,6 @@ export default function ViewPasswords() {
   } = useWallet();
   
   const router = useRouter();
-  
   const [selectedPassword, setSelectedPassword] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,7 +44,11 @@ export default function ViewPasswords() {
     };
   }, []);
 
-  // Fetch passwords from blockchain when wallet is connected
+  /**
+   * Fetch passwords from blockchain when wallet is connected
+   * Error catching for when something doesnt work
+   * This is where the passwords are pulled from the blockchain
+   */ 
   useEffect(() => {
     const fetchPasswords = async () => {
       if (!walletAddress) return;
@@ -59,11 +67,12 @@ export default function ViewPasswords() {
         setIsLoading(false);
       }
     };
-    
     fetchPasswords();
   }, [walletAddress]);
 
-  // Filter passwords based on search query
+  /**  
+   * Filter passwords based on search query
+  */
   useEffect(() => {
     if (!walletAddress) return;
     if (searchQuery) {
@@ -79,12 +88,17 @@ export default function ViewPasswords() {
     }
   }, [passwords, searchQuery, walletAddress]);
 
+  //Simple copy to clipboard method
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
 
+  /**
+   * Sets the currently selected password to show its details
+   * handles issues if the screen is smaller
+   */
   const handlePasswordSelect = (password) => {
     setSelectedPassword(password);
     if (isMobile) {
@@ -95,12 +109,15 @@ export default function ViewPasswords() {
   const handleBackToList = () => {
     setShowMobileDetail(false);
   };
-  
+  /**
+   * Deletes a password from the blockchain
+   * confirms before completing the action 
+   * "deletes" means it practically unmarks the details and cant access it anymore
+   */
   const handleDeletePassword = async (passwordId) => {
     if (!confirm('Are you sure you want to delete this password? This action cannot be undone.')) {
       return;
     }
-    
     try {
       const result = await deletePassword(passwordId);
       if (result.success) {
@@ -137,7 +154,6 @@ export default function ViewPasswords() {
       </Container>
     );
   }
-
   return (
     <Container>
       <Navbar />
@@ -164,9 +180,7 @@ export default function ViewPasswords() {
             </SearchContainer>
           </ActionsContainer>
         </Header>
-        
-        {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
-        
+        {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}      
         {isLoading ? (
           <LoadingContainer>
             <LoadingSpinner />
@@ -195,7 +209,6 @@ export default function ViewPasswords() {
                     <PasswordCategory>{password.category}</PasswordCategory>
                   </PasswordItem>
                 ))}
-                
                 {filteredPasswords.length === 0 && (
                   <NoPasswordsMessage>
                     {searchQuery
@@ -206,7 +219,6 @@ export default function ViewPasswords() {
                 )}
               </PasswordsList>
             )}
-            
             {(!isMobile || (isMobile && showMobileDetail)) && selectedPassword ? (
               <PasswordDetailsSection>
                 {isMobile && (
@@ -215,12 +227,10 @@ export default function ViewPasswords() {
                     Back to list
                   </BackButton>
                 )}
-                
                 <DetailsHeader>
                   <DetailsTitle>{selectedPassword.name}</DetailsTitle>
                   <CategoryBadge>{selectedPassword.category}</CategoryBadge>
-                </DetailsHeader>
-                
+                </DetailsHeader>               
                 <DetailGrid>
                   <DetailItem>
                     <DetailLabel>Username / Email</DetailLabel>
@@ -236,7 +246,6 @@ export default function ViewPasswords() {
                       )}
                     </DetailValueWithAction>
                   </DetailItem>
-                  
                   <DetailItem>
                     <DetailLabel>Password</DetailLabel>
                     <DetailValueWithAction>
@@ -260,7 +269,6 @@ export default function ViewPasswords() {
                     </DetailValueWithAction>
                     {isCopied && <CopiedMessage>Copied to clipboard!</CopiedMessage>}
                   </DetailItem>
-                  
                   <DetailItem>
                     <DetailLabel>Website</DetailLabel>
                     <DetailValueWithAction>
@@ -275,7 +283,6 @@ export default function ViewPasswords() {
                       )}
                     </DetailValueWithAction>
                   </DetailItem>
-                  
                   {selectedPassword.notes && (
                     <DetailItem fullWidth>
                       <DetailLabel>Notes</DetailLabel>
@@ -283,7 +290,6 @@ export default function ViewPasswords() {
                     </DetailItem>
                   )}
                 </DetailGrid>
-                
                 <ButtonsContainer>
                   <DeleteButton onClick={() => handleDeletePassword(selectedPassword.id)}>
                     <Trash2 size={16} />

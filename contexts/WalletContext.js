@@ -8,29 +8,24 @@ export function WalletProvider({ children }) {
   const [connectionError, setConnectionError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Check if wallet is already connected on initial load
   useEffect(() => {
     checkIfWalletIsConnected();
   }, []);
 
   const checkIfWalletIsConnected = async () => {
     try {
-      // Check if window is defined (browser environment)
       if (typeof window !== 'undefined') {
         const { ethereum } = window;
         if (!ethereum) {
           console.log("Make sure you have MetaMask installed!");
           return;
         }
-        
         const accounts = await ethereum.request({ method: "eth_accounts" });
         if (accounts.length !== 0) {
           const account = accounts[0];
           console.log("Found an authorized account:", account);
           setWalletAddress(account);
           setIsLoading(true);
-          
-          // Simulate loading time for blockchain data retrieval
           setTimeout(() => {
             setIsLoading(false);
           }, 1000);
@@ -43,7 +38,6 @@ export function WalletProvider({ children }) {
     }
   };
 
-  // Connect wallet
   const connectWallet = async () => {
     try {
       setIsConnecting(true);
@@ -83,7 +77,6 @@ export function WalletProvider({ children }) {
     setWalletAddress('');
   };
 
-  // Handle account changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const { ethereum } = window;
@@ -98,14 +91,12 @@ export function WalletProvider({ children }) {
         };
 
         const handleChainChanged = () => {
-          // Reload the page when chain changes
           window.location.reload();
         };
 
         ethereum.on('accountsChanged', handleAccountsChanged);
         ethereum.on('chainChanged', handleChainChanged);
 
-        // Cleanup listeners on unmount
         return () => {
           ethereum.removeListener('accountsChanged', handleAccountsChanged);
           ethereum.removeListener('chainChanged', handleChainChanged);
@@ -114,7 +105,6 @@ export function WalletProvider({ children }) {
     }
   }, []);
 
-  // Format wallet address for display (e.g. 0x1234...5678)
   const formatWalletAddress = (address) => {
     if (!address) return '';
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
@@ -135,7 +125,6 @@ export function WalletProvider({ children }) {
   );
 }
 
-// Custom hook to use the wallet context
 export function useWallet() {
   return useContext(WalletContext);
 }

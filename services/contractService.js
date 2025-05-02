@@ -1,5 +1,8 @@
-// contractService.js
-// Service to interact with the SimplePasswordManager smart contract
+/**
+ * Interact with smart contract 
+ * imports the ABI and address
+ * THis is how we refer to our methods and use the blockchain
+ */
 import { ethers } from "ethers";
 const contractABI = [
 	{
@@ -97,14 +100,17 @@ const contractABI = [
 ];
 
 const contractAddress = "0x10e1e109889ef1dd77133522c7216f3b3a4a3c6e"
-
+//Gets an ETH provider
 const getProvider = () => {
   if (window.ethereum) {
     return new ethers.providers.Web3Provider(window.ethereum);
   }
   throw new Error("No Ethereum browser extension detected");
 };
-
+/**
+ * Creates and returns an instance of our smart contract
+ * Connects to the users wallet to enable usage
+ */
 export const getContract = async () => {
   const provider = getProvider();
   await provider.send("eth_requestAccounts", []);
@@ -117,7 +123,10 @@ export const encryptData = (data) => {
   return btoa(jsonStr);
 };
 
-// Decrypt password data
+/**
+ * Decrypt password data using a simple method
+ * using a very basic way to encrypt and decrypt data
+ */
 export const decryptData = (encryptedData) => {
   try {
     const jsonStr = atob(encryptedData);
@@ -128,7 +137,10 @@ export const decryptData = (encryptedData) => {
   }
 };
 
-// Add a new password
+/**
+ * Adds a new password to the blockchain under the users wallet address
+ * Takes all fields of data this is called from the createpasswords page
+ */
 export const addPassword = async (passwordName, category, passwordData) => {
   try {
     const contract = await getContract();
@@ -144,7 +156,10 @@ export const addPassword = async (passwordName, category, passwordData) => {
   }
 };
 
-// Delete a password
+/**
+ * Delets a password from the blockchain
+ * removes it from the wallets view page so the user no longer sees it
+ */
 export const deletePassword = async (passwordId) => {
   try {
     const contract = await getContract();
@@ -158,7 +173,7 @@ export const deletePassword = async (passwordId) => {
   }
 };
 
-// Get a specific password
+// View a certain password based off of its ID
 export const getPassword = async (passwordId) => {
   try {
     const contract = await getContract();
@@ -179,7 +194,10 @@ export const getPassword = async (passwordId) => {
   }
 };
 
-// Get all passwords for the user
+/**
+ * Gets all passwords for the user
+ * used in the view passwords page where the user can view and search for any of their created passwords
+ */
 export const getAllPasswords = async () => {
   try {
     const contract = await getContract();

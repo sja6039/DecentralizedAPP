@@ -29,7 +29,6 @@ const passwordCategories = [
 export default function CreatePassword() {
   const { walletAddress, connectWallet, isConnecting, connectionError } = useWallet();
   const router = useRouter();
-  
   const [passwordLength, setPasswordLength] = useState(16);
   const [includeUppercase, setIncludeUppercase] = useState(true);
   const [includeLowercase, setIncludeLowercase] = useState(true);
@@ -46,7 +45,6 @@ export default function CreatePassword() {
   const [isSaving, setIsSaving] = useState(false);
   const [strength, setStrength] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
-
 
   /**
    * Generates a random passwrod based on selected options
