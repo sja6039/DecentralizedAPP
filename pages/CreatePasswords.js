@@ -1,7 +1,8 @@
 /*
  * Create Password page
- * This page allows users to create and securely store new passwords
+ * This page allows users to generate and securely store new passwords
  * Users can generate strong passwords, categorize them, and add details
+ * Then pay a small fee and store them in the block chain encrypted
  */
 import { useState} from 'react';
 import styled from 'styled-components';
@@ -46,55 +47,60 @@ export default function CreatePassword() {
   const [strength, setStrength] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
 
+
+  /**
+   * Generates a random passwrod based on selected options
+   * uses given options and length to create a secure password for the user
+   */
   const generatePassword = () => {
     const chars = [
       includeLowercase ? 'abcdefghijklmnopqrstuvwxyz' : '',
       includeUppercase ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' : '',
       includeNumbers ? '0123456789' : '',
       includeSymbols ? '!@#$%^&*()_+~`|}{[]:;?><,./-=' : ''
-    ].join('');
-        
+    ].join('');   
     let password = '';
     for (let i = 0; i < passwordLength; i++) {
       password += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    
     setGeneratedPassword(password);
     calculateStrength(password);
   };
 
+  /**
+   * Simple method to evaluate password strength
+   * using a scaled of 0-5 depending on character types
+   */
   const calculateStrength = (password) => {
-    // Simple password strength calculation
     let score = 0;
-    
     // Length check
     if (password.length >= 12) score += 2;
     else if (password.length >= 8) score += 1;
-    
     // Character variety checks
     if (/[A-Z]/.test(password)) score += 1;
     if (/[a-z]/.test(password)) score += 1;
     if (/[0-9]/.test(password)) score += 1;
     if (/[^A-Za-z0-9]/.test(password)) score += 1;
-    
     setStrength(Math.min(5, score));
   };
 
+  //enables copying the generated password to clipboard
   const copyToClipboard = () => {
     navigator.clipboard.writeText(generatedPassword);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  // Update the handleSave function to use the smart contract
+  /**
+   * Saves the password and related info to the blockchain
+   * handles the storage process and validates all the needed fields
+   */
   const handleSave = async () => {
     if (!passwordName || !generatedPassword || !category) {
       return;
     }
-    
     setIsSaving(true);
     setErrorMessage('');
-    
     try {
       // Prepare the password data to be encrypted and stored
       const passwordData = {
@@ -105,10 +111,8 @@ export default function CreatePassword() {
         notes: notes,
         createdAt: new Date().toISOString()
       };
-      
       // Call the contract service to add the password
       const result = await addPassword(passwordName, category, passwordData);
-      
       if (result.success) {
         // Reset form
         setPasswordName('');
@@ -118,7 +122,6 @@ export default function CreatePassword() {
         setCategory('');
         setGeneratedPassword('');
         setIsPasswordVisible(false);
-        
         // Show success message and redirect
         router.push('/ViewPasswords');
       } else {
@@ -161,7 +164,6 @@ export default function CreatePassword() {
       </Container>
     );
   }
-
   return (
     <Container>
       <Navbar />
@@ -172,16 +174,13 @@ export default function CreatePassword() {
             Generate strong, unique passwords and securely store them on the blockchain
           </HeaderDescription>
         </PageHeader>
-
         {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
-
         <ContentGrid>
           <GeneratorCard>
             <CardTitle>
               <Lock size={20} />
               Password Generator
             </CardTitle>
-
             <GeneratorOptions>
               <RangeGroup>
                 <RangeLabel>
@@ -201,7 +200,6 @@ export default function CreatePassword() {
                   <span>32</span>
                 </RangeMarks>
               </RangeGroup>
-
               <OptionsGroup>
                 <CheckboxGroup>
                   <Checkbox
@@ -212,7 +210,6 @@ export default function CreatePassword() {
                   />
                   <CheckboxLabel htmlFor="uppercase">Uppercase Letters (A-Z)</CheckboxLabel>
                 </CheckboxGroup>
-
                 <CheckboxGroup>
                   <Checkbox
                     type="checkbox"
@@ -222,7 +219,6 @@ export default function CreatePassword() {
                   />
                   <CheckboxLabel htmlFor="lowercase">Lowercase Letters (a-z)</CheckboxLabel>
                 </CheckboxGroup>
-
                 <CheckboxGroup>
                   <Checkbox
                     type="checkbox"
@@ -232,7 +228,6 @@ export default function CreatePassword() {
                   />
                   <CheckboxLabel htmlFor="numbers">Numbers (0-9)</CheckboxLabel>
                 </CheckboxGroup>
-
                 <CheckboxGroup>
                   <Checkbox
                     type="checkbox"
@@ -243,13 +238,11 @@ export default function CreatePassword() {
                   <CheckboxLabel htmlFor="symbols">Special Characters (!@#$...)</CheckboxLabel>
                 </CheckboxGroup>
               </OptionsGroup>
-
               <GenerateButton onClick={generatePassword}>
                 <RefreshCw size={18} />
                 Generate Password
               </GenerateButton>
             </GeneratorOptions>
-
             {generatedPassword && (
               <PasswordResult>
                 <PasswordDisplay isVisible={isPasswordVisible}>
@@ -284,13 +277,11 @@ export default function CreatePassword() {
               </PasswordResult>
             )}
           </GeneratorCard>
-
           <DetailsCard>
             <CardTitle>
               <Shield size={20} />
               Password Details
             </CardTitle>
-
             <FormGroup>
               <FormLabel htmlFor="passwordName">Password Name*</FormLabel>
               <FormInput
@@ -302,7 +293,6 @@ export default function CreatePassword() {
                 required
               />
             </FormGroup>
-
             <FormGroup>
               <FormLabel htmlFor="category">Category*</FormLabel>
               <FormSelect
@@ -317,7 +307,6 @@ export default function CreatePassword() {
                 ))}
               </FormSelect>
             </FormGroup>
-
             <FormGroup>
               <FormLabel htmlFor="username">Username/Email (optional)</FormLabel>
               <FormInput
@@ -328,7 +317,6 @@ export default function CreatePassword() {
                 onChange={(e) => setUsername(e.target.value)}
               />
             </FormGroup>
-
             <FormGroup>
               <FormLabel htmlFor="website">Website URL (optional)</FormLabel>
               <FormInput
@@ -339,7 +327,6 @@ export default function CreatePassword() {
                 onChange={(e) => setWebsite(e.target.value)}
               />
             </FormGroup>
-
             <FormGroup>
               <FormLabel htmlFor="notes">Notes (optional)</FormLabel>
               <FormTextarea
@@ -349,11 +336,9 @@ export default function CreatePassword() {
                 onChange={(e) => setNotes(e.target.value)}
               />
             </FormGroup>
-
             <SaveButton onClick={handleSave} disabled={isSaving}>
               {isSaving ? 'Encrypting & Saving to Blockchain...' : 'Save Password Securely'}
             </SaveButton>
-
             <EncryptionNote>
               <Lock size={14} />
               Your password will be encrypted with your personal key before being stored on the blockchain
