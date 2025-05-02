@@ -120,6 +120,7 @@ export const getContract = async () => {
 
 // Encrypt password data using a simple method
 export const encryptData = (data) => {
+  const jsonStr = JSON.stringify(data);
   return btoa(jsonStr);
 };
 
